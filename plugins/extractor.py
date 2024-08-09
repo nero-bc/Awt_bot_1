@@ -2,7 +2,8 @@ from pyrogram import filters
 from pyrogram import Client
 from plugins import start 
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from plugins import audio 
+from plugins import audio
+from plugins import merge 
 from helper import download 
 from config import Config
 
