@@ -13,21 +13,21 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 user_media_files = {}
 user_merge_mode = {}
 
-@app.on_message(filters.command("merge_audio"))
+@Client.on_message(filters.command("merge_audio"))
 async def set_merge_audio(client, message: Message):
     user_id = message.from_user.id
     user_merge_mode[user_id] = "audio"
     user_media_files[user_id] = []
     await message.reply_text("Send the first audio file.")
 
-@app.on_message(filters.command("merge_video"))
+@Client.on_message(filters.command("merge_video"))
 async def set_merge_video(client, message: Message):
     user_id = message.from_user.id
     user_merge_mode[user_id] = "video"
     user_media_files[user_id] = []
     await message.reply_text("Send the video file.")
 
-@app.on_message((filters.video | filters.audio) & ~filters.forwarded)
+@Client.on_message((filters.video | filters.audio) & ~filters.forwarded)
 async def receive_media(client, message: Message):
     user_id = message.from_user.id
 
@@ -173,7 +173,7 @@ async def merge_video_and_audio(client, message, user_id):
     del user_media_files[user_id]
     del user_merge_mode[user_id]
 
-@app.on_message(filters.command("cancel"))
+@Client.on_message(filters.command("cancel"))
 async def cancel(client, message: Message):
     user_id = message.from_user.id
     if user_id in user_media_files:
