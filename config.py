@@ -1,5 +1,7 @@
 import os, time
 
+id_pattern = re.compile(r'^.\d+$') 
+
 class Config(object):
     #Audio-_edit_bot client Config 
     API_ID = os.getenv("API_ID", "21740783")
