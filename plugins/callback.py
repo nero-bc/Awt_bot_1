@@ -4,7 +4,7 @@ from plugins.merge import set_merge_audio, set_merge_video  # Import from merge.
 from plugins import start, audio
 from helper.progress import PRGRS
 from helper.tools import clean_up
-from config import Config
+from config import Config, Txt
 from plugins.audio import handle_remove_audio
 from helper.download import download_file, DATA
 from helper.ffmpeg import extract_audio, extract_subtitle
@@ -36,6 +36,36 @@ async def cb_handler(client, query):
             text=Txt.START_TXT.format(query.from_user.mention),
             reply_markup=keyboard,
             disable_web_page_preview=True
+        )
+        return
+    elif data == "help":
+        await query.answer()
+        keyboard = InlineKeyboardMarkup([[
+                # Don't change the owner details if you change the bot not work  #
+                InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
+                ],[
+                InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data = "close"),
+                InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data = "start")
+            ]]) 
+        
+        await query.message.edit_text(
+            text=Txt.HELP_TXT,
+            disable_web_page_preview=True,
+        )
+        return
+    elif data == "about":
+        await query.answer()
+        keyboard = InlineKeyboardMarkup([[
+                #⚠️ Don't change the owner details if you change the bot not work ⚠️ #
+                InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
+                ],[
+                InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data = "close"),
+                InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data = "start")
+            ]])  
+
+        await query.message.edit_text(
+            text=Txt.ABOUT_TXT.format(client.mention),
+            disable_web_page_preview = True,
         )
         return
 
