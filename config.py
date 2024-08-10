@@ -8,10 +8,6 @@ class Config(object):
 
     ADMIN = [int(os.environ.get("ADMIN", "6299192020"))
 
-
-    #port to run web server
-    PORT = int(os.getenv('PORT', "8050"))
-
     # database config
     DB_NAME = os.environ.get("DB_NAME","Speedwolf1")     
     DB_URL  = os.environ.get("DB_URL","mongodb+srv://Speedwolf1:speedwolf24689@cluster0.rgfywsf.mongodb.net/")
