@@ -20,11 +20,6 @@ async def confirm_dwnld(client, message):
                 [InlineKeyboardButton(text="Video+audio 📹", callback_data="set_merge_video"),
                  InlineKeyboardButton(text="CANCEL", callback_data="close")]
             ])
-        elif filetype.mime_type.startswith("audio/"):
-            keyboard = InlineKeyboardMarkup([
-                [InlineKeyboardButton(text="audio+audio 🎵", callback_data="merge_audio")],
-                [InlineKeyboardButton(text="CANCEL", callback_data="close")]
-            ])
         
         await message.reply_text(
             "**What do you want me to do 🤔**",
