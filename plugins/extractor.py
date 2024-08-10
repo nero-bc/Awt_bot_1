@@ -22,7 +22,7 @@ async def confirm_dwnld(client, message):
             ])
         elif filetype.mime_type.startswith("audio/"):
             keyboard = InlineKeyboardMarkup([
-                [InlineKeyboardButton(text="audio+audio 🎵", command="merge_audio")],
+                [InlineKeyboardButton(text="audio+audio 🎵", callback_data="merge_audio")],
                 [InlineKeyboardButton(text="CANCEL", callback_data="close")]
             ])
         
