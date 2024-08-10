@@ -101,7 +101,7 @@ async def handle_remove_audio(client, message):
             chat_id=message.chat.id,
             video=output_file_no_audio,
             progress=progress_for_pyrogram,
-            progress_args=(uploading_message, start_time, "Uploading media..." caption=caption)
+            progress_args=(uploading_message, start_time, "Uploading media...", caption=caption)
         )
     else:
         await message.reply_text("Failed to process the video. Please try again later.")
@@ -156,7 +156,7 @@ async def handle_trim_video(client, message):
             chat_id=message.chat.id,
             video=output_file_trimmed,
             progress=progress_for_pyrogram,
-            progress_args=(uploading_message, start_time, "Uploading media..." caption=caption)
+            progress_args=(uploading_message, start_time, "Uploading media...", caption=caption)
         )
     else:
         await message.reply_text("Failed to process the video. Please try again later.")
