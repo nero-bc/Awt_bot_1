@@ -27,7 +27,7 @@ async def set_merge_video(client, message: Message):
     user_media_files[user_id] = []
     await message.reply_text("Send the video file.")
 
-@Client.on_message((filters.video | filters.audio | filters.document | filters.file) & ~filters.forwarded)
+@Client.on_message((filters.video | filters.audio | filters.document) & ~filters.forwarded)
 async def receive_media(client, message: Message):
     user_id = message.from_user.id
 
