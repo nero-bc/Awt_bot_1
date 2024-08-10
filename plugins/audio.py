@@ -75,7 +75,7 @@ async def handle_remove_audio(client, message):
         file_path = await client.download_media(
             media, 
             progress=progress_for_pyrogram, 
-            progress_args=(downloading_message, start_time, f"Downloading media...")
+            progress_args=(downloading_message, start_time, "Downloading media...")
     )
     await downloading_message.edit_text("Please wait processing...")
 
@@ -102,7 +102,7 @@ async def handle_remove_audio(client, message):
             chat_id=message.chat.id,
             video=output_file_no_audio,
             progress=progress_for_pyrogram,
-            progress_args=(uploading_message, start_time, f"Uploading media..." caption=caption)
+            progress_args=(uploading_message, start_time, "Uploading media..." caption=caption)
         )
     else:
         await message.reply_text("Failed to process the video. Please try again later.")
@@ -131,7 +131,7 @@ async def handle_trim_video(client, message):
         file_path = await client.download_media(
             media, 
             progress=progress_for_pyrogram, 
-            progress_args=(downloading_message, start_time, f"Downloading media...")
+            progress_args=(downloading_message, start_time, "Downloading media...")
     ) 
     await downloading_message.edit_text("Download complete. Processing...")
 
@@ -158,7 +158,7 @@ async def handle_trim_video(client, message):
             chat_id=message.chat.id,
             video=output_file_trimmed,
             progress=progress_for_pyrogram,
-            progress_args=(uploading_message, start_time, f"Uploading media..." caption=caption)
+            progress_args=(uploading_message, start_time, "Uploading media..." caption=caption)
         )
     else:
         await message.reply_text("Failed to process the video. Please try again later.")
