@@ -1,7 +1,7 @@
 import os
 import asyncio
 from pyrogram import Client, filters
-from pyrogram.types import Message
+from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 import subprocess
 import time
 from config import Config
@@ -32,7 +32,14 @@ async def receive_media(client, message: Message):
     user_id = message.from_user.id
 
     if user_id not in user_merge_mode:
-        await message.reply_text("Please use /merge_audio or /merge_video to start the merging process.")
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("Start Audio Merge", callback_data="start_merge_audio")],
+            [InlineKeyboardButton("Start Video Merge", callback_data="start_merge_video")]
+        ])
+        await message.reply_text(
+            "Please use the buttons below to start the merging process.",
+            reply_markup=keyboard
+        )
         return
 
     merge_mode = user_merge_mode[user_id]
@@ -181,3 +188,17 @@ async def cancel(client, message: Message):
     if user_id in user_merge_mode:
         del user_merge_mode[user_id]
     await message.reply_text("Merging process has been cancelled.")
+
+@Client.on_callback_query(filters.regex("start_merge_audio"))
+async def handle_merge_audio_start(client, query):
+    user_id = query.from_user.id
+    user_merge_mode[user_id] = "audio"
+    user_media_files[user_id] = []
+    await query.message.edit_text("Send the first audio file.")
+
+@Client.on_callback_query(filters.regex("start_merge_video"))
+async def handle_merge_video_start(client, query):
+    user_id = query.from_user.id
+    user_merge_mode[user_id] = "video"
+    user_media_files[user_id] = []
+    await query.message.edit_text("Send the video file.")
