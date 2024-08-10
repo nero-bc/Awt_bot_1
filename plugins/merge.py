@@ -1,7 +1,7 @@
 import os
 import asyncio
 from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+from pyrogram.types import Message
 import subprocess
 import time
 from config import Config
@@ -12,6 +12,7 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 user_media_files = {}
 user_merge_mode = {}
+
 
 @Client.on_message(filters.command("merge_audio"))
 async def set_merge_audio(client, message: Message):
@@ -27,19 +28,12 @@ async def set_merge_video(client, message: Message):
     user_media_files[user_id] = []
     await message.reply_text("Send the video file.")
 
-@Client.on_message((filters.video | filters.audio) & ~filters.forwarded)
+@Client.on_message((filters.video | filters.audio | filters.file | filters.document) & ~filters.forwarded)
 async def receive_media(client, message: Message):
     user_id = message.from_user.id
 
     if user_id not in user_merge_mode:
-        keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("Start Audio Merge", command="merge_audios")],
-            [InlineKeyboardButton("Start Video Merge", command="merge_video")]
-        ])
-        await message.reply_text(
-            "Please use the buttons below to start the merging process.",
-            reply_markup=keyboard
-        )
+        await message.reply_text("Please use /merge_audio or /merge_video to start the merging process.")
         return
 
     merge_mode = user_merge_mode[user_id]
@@ -137,8 +131,6 @@ async def merge_video_and_audio(client, message, user_id):
         "-c:v", "copy",
         "-c:a", "aac",
         "-strict", "experimental",
-        "-map", "0:v:0",
-        "-map", "1:a:0",
         output_path
     ]
 
@@ -179,26 +171,3 @@ async def merge_video_and_audio(client, message, user_id):
     # Remove user data
     del user_media_files[user_id]
     del user_merge_mode[user_id]
-
-@Client.on_message(filters.command("cancel"))
-async def cancel(client, message: Message):
-    user_id = message.from_user.id
-    if user_id in user_media_files:
-        del user_media_files[user_id]
-    if user_id in user_merge_mode:
-        del user_merge_mode[user_id]
-    await message.reply_text("Merging process has been cancelled.")
-
-@Client.on_callback_query(filters.regex("start_merge_audio"))
-async def handle_merge_audio_start(client, query):
-    user_id = query.from_user.id
-    user_merge_mode[user_id] = "audio"
-    user_media_files[user_id] = []
-    await query.message.edit_text("Send the first audio file.")
-
-@Client.on_callback_query(filters.regex("start_merge_video"))
-async def handle_merge_video_start(client, query):
-    user_id = query.from_user.id
-    user_merge_mode[user_id] = "video"
-    user_media_files[user_id] = []
-    await query.message.edit_text("Send the video file.")
