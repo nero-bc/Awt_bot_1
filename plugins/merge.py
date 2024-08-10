@@ -33,8 +33,8 @@ async def receive_media(client, message: Message):
 
     if user_id not in user_merge_mode:
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton("Start Audio Merge", callback_data="start_merge_audio")],
-            [InlineKeyboardButton("Start Video Merge", callback_data="start_merge_video")]
+            [InlineKeyboardButton("Start Audio Merge", callback_data="merge_audio")],
+            [InlineKeyboardButton("Start Video Merge", callback_data="merge_video")]
         ])
         await message.reply_text(
             "Please use the buttons below to start the merging process.",
