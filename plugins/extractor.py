@@ -7,10 +7,10 @@ from plugins import merge
 from helper import download 
 from config import Config
 
-@Client.on_message(filters.private & (filters.document | filters.video))
+@Client.on_message(filters.private & (filters.document | filters.video | filters.audio))
 async def confirm_dwnld(client, message):
     media = message
-    filetype = media.document or media.video
+    filetype = media.document or media.video or media.audio
 
     if filetype.mime_type.startswith("video/"):
         await message.reply_text(
@@ -21,9 +21,9 @@ async def confirm_dwnld(client, message):
                   InlineKeyboardButton(text="Remove Audio🎧", callback_data="handle_remove_audio")
                 ],
                 [ InlineKeyboardButton(text="Trim Video ✂️", callback_data="handle_trim_video"),
-                  InlineKeyboardButton(text="audio+Audio🎵", callback_data="set_merge_audio")
+                  InlineKeyboardButton(text="audio+audio🎵", callback_data="merge_audio")
                 ],
-                [ InlineKeyboardButton(text="Video+audio 📹", callback_data="set_merge_video"),
+                [ InlineKeyboardButton(text="Video+audio 📹", callback_data="merge_video"),
                   InlineKeyboardButton(text="CANCEL", callback_data="close")
                 ]
             ])
