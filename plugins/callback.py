@@ -1,12 +1,10 @@
-from pyrogram import filters, Client
+from pyrogram import Client
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from plugins import start, audio
-from helper.progress import PRGRS
 from plugins import merge
+from helper.progress import PRGRS
 from helper.tools import clean_up
 from helper.download import download_file, DATA
 from helper.ffmpeg import extract_audio, extract_subtitle
-from plugins.audio import handle_remove_audio  # Ensure this import matches your structure
 import logging
 
 logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -14,6 +12,7 @@ logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s
 @Client.on_callback_query()
 async def cb_handler(client, query):
     data = query.data
+    user_id = query.from_user.id
 
     if data == "start_data":
         await query.answer()
@@ -53,31 +52,17 @@ async def cb_handler(client, query):
         await query.message.reply_text("Please use the command in the format: /trim_video <start_time> <end_time>.\nExample: /trim_video 00:00:10 00:00:20")
         await query.message.delete()
 
-    elif data == "merge_audio":
+    elif data == "set_merge_audio":
         await query.answer()
-        await set_merge_audio(client, query.message)
-        await query.message.delete()
+        await query.message.edit_text("Send the first audio file.")
+        user_merge_mode[user_id] = "audio"
+        user_media_files[user_id] = []
 
-    elif data == "merge_video":
+    elif data == "set_merge_video":
         await query.answer()
-        await set_merge_video(client, query.message)
-        await query.message.delete()
-
-
-    elif query.data == "progress_msg":
-        try:
-            msg = "Progress Details...\n\nCompleted : {current}\nTotal Size : {total}\nSpeed : {speed}\nProgress : {progress:.2f}%\nETA: {eta}"
-            await query.answer(
-                msg.format(
-                    **PRGRS[f"{query.message.chat.id}_{query.message.message_id}"]
-                ),
-                show_alert=True
-            )
-        except:
-            await query.answer(
-                "Processing your file...", msg,
-                show_alert=True
-            )
+        await query.message.edit_text("Send the video file.")
+        user_merge_mode[user_id] = "video"
+        user_media_files[user_id] = []
 
     elif data.startswith('audio'):
         await query.answer()
