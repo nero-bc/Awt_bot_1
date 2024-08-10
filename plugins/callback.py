@@ -1,11 +1,10 @@
 from pyrogram import filters, Client
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from plugins.merge import set_merge_audio, set_merge_video  # Import from merge.py
-from plugins import audio
-from helper.progress import PRGRS
+from plugins.merge import set_merge_audio, set_merge_video  # Adjust the import
 from helper.tools import clean_up
 from helper.download import download_file, DATA
 from helper.ffmpeg import extract_audio, extract_subtitle
+from plugins.audio import handle_remove_audio
 import logging
 
 logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -31,7 +30,7 @@ async def cb_handler(client, query):
         ])
 
         await query.message.edit_text(
-            text=Txt.START_TXT.format(query.from_user.mention),
+            text="Welcome to the bot!",
             reply_markup=keyboard,
             disable_web_page_preview=True
         )
@@ -54,12 +53,12 @@ async def cb_handler(client, query):
 
     elif data == "merge_audio":
         await query.answer()
-        await set_merge_audio(client, query.message)  # Use the function from merge.py
+        await set_merge_audio(client, query.message)
         await query.message.delete()
 
     elif data == "merge_video":
         await query.answer()
-        await set_merge_video(client, query.message)  # Use the function from merge.py
+        await set_merge_video(client, query.message)
         await query.message.delete()
 
     elif query.data == "progress_msg":
