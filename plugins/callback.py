@@ -1,6 +1,6 @@
 from pyrogram import filters, Client
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from merge import set_merge_audio, set_merge_video  # Import from merge.py
+from plugins.merge import set_merge_audio, set_merge_video  # Import from merge.py
 from plugins import audio
 from helper.progress import PRGRS
 from helper.tools import clean_up
