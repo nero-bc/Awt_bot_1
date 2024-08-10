@@ -54,16 +54,12 @@ async def cb_handler(client, query):
 
     elif data == "merge_audio":
         await query.answer()
-        await query.message.edit_text("Send the first audio file.")
-        user_merge_mode[user_id] = "audio"
-        user_media_files[user_id] = []
+        await set_merge_audio(client, query.message)
         await query.message.delete()
 
     elif data == "merge_video":
         await query.answer()
-        await query.message.edit_text("Send the video file.")
-        user_merge_mode[user_id] = "video"
-        user_media_files[user_id] = []
+        await set_merge_video(client, query.message)
         await query.message.delete()
 
     elif data.startswith('audio'):
