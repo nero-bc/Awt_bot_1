@@ -12,9 +12,9 @@ class Config(object):
 
     # other configs
     BOT_UPTIME  = time.time()
-    ADMIN = [int(os.environ.get("ADMIN", "6299192020"))
     LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", "0"))
     START_PIC   = os.environ.get("START_PIC", "https://telegra.ph/file/feb6dd0a1cb8576943c0f.jpg")
+    ADMIN = [int(os.environ.get("ADMIN", "6299192020"))
 
     # wes response configuration     
     WEBHOOK = bool(os.environ.get("WEBHOOK", "True"))
