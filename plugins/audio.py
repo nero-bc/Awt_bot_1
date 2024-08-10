@@ -70,12 +70,11 @@ async def handle_remove_audio(client, message):
     media = message.reply_to_message.video or message.reply_to_message.document
     downloading_message = await message.reply_text("Downloading media...")
 
-    try:
-        start_time = time.time()
-        file_path = await client.download_media(
-            media, 
-            progress=progress_for_pyrogram, 
-            progress_args=(downloading_message, start_time, "Downloading media...")
+    start_time = time.time()
+    file_path = await client.download_media(
+        media, 
+        progress=progress_for_pyrogram, 
+        progress_args=(downloading_message, start_time, "Downloading media...")
     )
     await downloading_message.edit_text("Please wait processing...")
 
@@ -126,12 +125,11 @@ async def handle_trim_video(client, message):
     media = message.reply_to_message.video or message.reply_to_message.document
     downloading_message = await message.reply_text("Downloading media...")
 
-    try:
-        start_time = time.time()
-        file_path = await client.download_media(
-            media, 
-            progress=progress_for_pyrogram, 
-            progress_args=(downloading_message, start_time, "Downloading media...")
+    start_time = time.time()
+    file_path = await client.download_media(
+        media, 
+        progress=progress_for_pyrogram, 
+        progress_args=(downloading_message, start_time, "Downloading media...")
     ) 
     await downloading_message.edit_text("Download complete. Processing...")
 
