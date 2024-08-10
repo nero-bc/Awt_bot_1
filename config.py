@@ -5,9 +5,6 @@ class Config(object):
     API_ID = os.getenv("API_ID", "21740783")
     API_HASH = os.getenv("API_HASH", "a5dc7fec8302615f5b441ec5e238cd46")
     BOT_TOKEN = os.getenv("BOT_TOKEN", "7496680438:AAHyEZDGnIoARpfywrzQOhB27un9pja49p4")
-
-    ADMIN = [int(os.environ.get("ADMIN", "6299192020"))
-
     # database config
     DB_NAME = os.environ.get("DB_NAME","Speedwolf1")     
     DB_URL  = os.environ.get("DB_URL","mongodb+srv://Speedwolf1:speedwolf24689@cluster0.rgfywsf.mongodb.net/")
@@ -15,6 +12,7 @@ class Config(object):
 
     # other configs
     BOT_UPTIME  = time.time()
+    ADMIN = [int(os.environ.get("ADMIN", "6299192020"))
     LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", "0"))
     START_PIC   = os.environ.get("START_PIC", "https://telegra.ph/file/feb6dd0a1cb8576943c0f.jpg")
 
