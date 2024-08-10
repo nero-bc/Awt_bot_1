@@ -2,10 +2,11 @@ from pyrogram import filters, Client
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from plugins import start, audio
 from helper.progress import PRGRS
-from plugins.merge import set_merge_audio, set_merge_video, receive_media  # Updated imports
+from plugins import merge
 from helper.tools import clean_up
 from helper.download import download_file, DATA
 from helper.ffmpeg import extract_audio, extract_subtitle
+from plugins.audio import handle_remove_audio  # Ensure this import matches your structure
 import logging
 
 logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -52,12 +53,12 @@ async def cb_handler(client, query):
         await query.message.reply_text("Please use the command in the format: /trim_video <start_time> <end_time>.\nExample: /trim_video 00:00:10 00:00:20")
         await query.message.delete()
 
-    elif data == "set_merge_audio":
+    elif data == "merge_audio":
         await query.answer()
         await set_merge_audio(client, query.message)
         await query.message.delete()
 
-    elif data == "set_merge_video":
+    elif data == "merge_video":
         await query.answer()
         await set_merge_video(client, query.message)
         await query.message.delete()
