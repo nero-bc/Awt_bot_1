@@ -1,6 +1,6 @@
 from pyrogram import filters, Client
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from merge import set_merge_audio, set_merge_video  # Import from merge.py
+from plugins.merge import set_merge_audio, set_merge_video  # Import from merge.py
 from config import Config
 
 @Client.on_message(filters.private & (filters.document | filters.video | filters.audio))
