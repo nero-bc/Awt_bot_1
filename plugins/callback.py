@@ -1,9 +1,11 @@
 from pyrogram import filters, Client
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from plugins.merge import set_merge_audio, set_merge_video  # Import from merge.py
-from plugins import audio
+from plugins import start, audio
 from helper.progress import PRGRS
 from helper.tools import clean_up
+from config import Config
+from plugins.audio import handle_remove_audio
 from helper.download import download_file, DATA
 from helper.ffmpeg import extract_audio, extract_subtitle
 import logging
@@ -52,17 +54,17 @@ async def cb_handler(client, query):
         await query.message.reply_text("Please use the command in the format: /trim_video <start_time> <end_time>.\nExample: /trim_video 00:00:10 00:00:20")
         await query.message.delete()
 
-    elif data == "merge_audio":
+    elif data == "set_merge_audio":
         await query.answer()
         await set_merge_audio(client, query.message)  # Use the function from merge.py
         await query.message.delete()
 
-    elif data == "merge_video":
+    elif data == "set_merge_video":
         await query.answer()
         await set_merge_video(client, query.message)  # Use the function from merge.py
         await query.message.delete()
 
-    elif query.data == "progress_msg":
+    elif data == "progress_msg":
         try:
             msg = "Progress Details...\n\nCompleted : {current}\nTotal Size : {total}\nSpeed : {speed}\nProgress : {progress:.2f}%\nETA: {eta}"
             await query.answer(
@@ -97,11 +99,14 @@ async def cb_handler(client, query):
 
     elif data.startswith('cancel'):
         try:
-            _, mapping, keyword = data.split('_')
-            cancel_data = DATA[keyword][int(mapping)]
-            await clean_up(cancel_data['location'])
+            query_type, mapping, keyword = data.split('_')
+            data = DATA[keyword][int(mapping)] 
+            await clean_up(data['location'])  
             await query.message.edit_text("**Cancelled...**")
-            await query.answer("Cancelled...", show_alert=True)
-        except KeyError:
-            await query.answer()
-            await query.message.edit_text("**Details Not Found**")
+            await query.answer(
+                "Cancelled...",
+                show_alert=True
+            ) 
+        except:
+            await query.answer() 
+            await query.message.edit_text("**Details Not Found**")        
