@@ -52,17 +52,19 @@ async def cb_handler(client, query):
         await query.message.reply_text("Please use the command in the format: /trim_video <start_time> <end_time>.\nExample: /trim_video 00:00:10 00:00:20")
         await query.message.delete()
 
-    elif data == "set_merge_audio":
+    elif data == "merge_audio":
         await query.answer()
         await query.message.edit_text("Send the first audio file.")
         user_merge_mode[user_id] = "audio"
         user_media_files[user_id] = []
+        await query.message.delete()
 
-    elif data == "set_merge_video":
+    elif data == "merge_video":
         await query.answer()
         await query.message.edit_text("Send the video file.")
         user_merge_mode[user_id] = "video"
         user_media_files[user_id] = []
+        await query.message.delete()
 
     elif data.startswith('audio'):
         await query.answer()
