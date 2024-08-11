@@ -10,7 +10,6 @@ from concurrent.futures import ThreadPoolExecutor
 from flask import Flask, request, jsonify
 from pyrogram import Client, filters
 from plugins import start
-from LOCAL.localisation import JPG3 
 from helper.utils import progress_for_pyrogram
 from plugins import extractor 
 from pyrogram.errors import FloodWait
@@ -91,7 +90,6 @@ async def handle_remove_audio(client, message):
             await client.send_video(
                 chat_id=message.chat.id,
                 caption= caption,
-                thumb = JPG3,
                 video=output_file_no_audio,
                 progress=progress_for_pyrogram,
                 progress_args=("Uploading...", uploader, time.time())
@@ -99,7 +97,7 @@ async def handle_remove_audio(client, message):
         else:
             await message.reply_text("Failed to process the video. Please try again later.")
         
-        await ms.delete()
+        await uploader.delete()
 
         # Safely remove files
         try:
