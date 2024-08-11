@@ -78,8 +78,9 @@ async def handle_remove_audio(client, message):
         success = await loop.run_in_executor(executor, remove_audio, file_path, output_file_no_audio)  # Await the method call
 
         if success:
-            metadata = await video_metadata(output_file_no_audio)
-            if metadata:
+            details = await get_video_details(output_file_no_audio)
+            if details:
+                metadata = await video_metadata(output_file_no_audio)
                 width = metadata["width"]
                 height = metadata["height"]
                 duration = metadata["duration"]
