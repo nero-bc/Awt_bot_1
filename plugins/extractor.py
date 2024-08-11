@@ -23,6 +23,7 @@ async def confirm_dwnld(client, message):
                 [InlineKeyboardButton(text="Video+audio 📹", callback_data="set_merge_video"),
                  InlineKeyboardButton(text="CANCEL", callback_data="close")]
             ])
+        )
     else:
         await message.reply_text(
             "Invalid Media",
