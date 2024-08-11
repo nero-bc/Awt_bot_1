@@ -95,6 +95,7 @@ async def handle_remove_audio(client, message):
             )
         else:
             await message.reply_text("Failed to process the video. Please try again later.")
-
+        
+        await ms.delete()
         os.remove(file_path)
         os.remove(output_file_no_audio)
