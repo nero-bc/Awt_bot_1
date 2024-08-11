@@ -38,7 +38,6 @@ def remove_audio(input_file, output_file):
     success, _ = run_command(command)
     return success
 
-
 async def get_video_details(file_path):
     command = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration,size', '-of', 'default=noprint_wrappers=1', file_path]
     success, output = run_command(command)
@@ -67,7 +66,7 @@ async def handle_remove_audio(client, message):
         )
     except Exception as e:
         print(e)
-        return await ms.edit(f"An error occured while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
+        return await ms.edit(f"An error occurred while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
     
     try:
         await ms.edit_text("Please wait processing...")
@@ -76,7 +75,7 @@ async def handle_remove_audio(client, message):
         output_file_no_audio = tempfile.mktemp(suffix=f"_{base_name}_noaudio.mp4")
 
         loop = asyncio.get_event_loop()
-        success = await loop.run_in_executor(executor, remove_audio, file_path, output_file_no_audio)
+        success = await loop.run_in_executor(executor, remove_audio, file_path, output_file_no_audio)  # Await the method call
 
         if success:
             metadata = await video_metadata(output_file_no_audio)
@@ -85,14 +84,14 @@ async def handle_remove_audio(client, message):
                 height = metadata["height"]
                 duration = metadata["duration"]
                 attributes = [DocumentAttributeVideo(duration=duration, w=width, h=height, supports_streaming=True)]
-                caption = f"Here's your cleaned video file. Duration: {duration_sec} seconds. Size: {size_mb} MB"
+                caption = f"Here's your cleaned video file. Duration: {duration} seconds. Size: {metadata['size']} MB"
                 uploader = await message.reply_text("Uploading media...")
             else:
                 caption = "Here's your cleaned video file."
             
             await client.send_video(
                 chat_id=message.chat.id,
-                caption= caption,
+                caption=caption,
                 thumb=JPG3,
                 attributes=attributes,
                 video=output_file_no_audio,
