@@ -43,10 +43,10 @@ async def cb_handler(client, query):
         await query.answer()
         keyboard = InlineKeyboardMarkup([[
                 # Don't change the owner details if you change the bot not work  #
-                InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
+                   InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
                 ],[
-                InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data = "close"),
-                InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data = "start")
+                   InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data = "close"),
+                   InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data = "start")
             ]]) 
         
         await query.message.edit_text(
@@ -58,10 +58,10 @@ async def cb_handler(client, query):
         await query.answer()
         keyboard = InlineKeyboardMarkup([[
                 #⚠️ Don't change the owner details if you change the bot not work ⚠️ #
-                InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
+                   InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
                 ],[
-                InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data = "close"),
-                InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data = "start")
+                   InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data = "close"),
+                   InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data = "start")
             ]])  
 
         await query.message.edit_text(
@@ -87,12 +87,12 @@ async def cb_handler(client, query):
 
     elif data == "set_merge_audio":
         await query.answer()
-        await set_merge_audio(client, query.message)  # Use the function from merge.py
+        await received_audio(client, query.message)  # Use the function from merge.py
         await query.message.delete()
 
     elif data == "set_merge_video":
         await query.answer()
-        await set_merge_video(client, query.message)  # Use the function from merge.py
+        await received_video(client, query.message)  # Use the function from merge.py
         await query.message.delete()
 
     elif data == "progress_msg":
