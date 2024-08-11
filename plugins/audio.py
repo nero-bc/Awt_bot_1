@@ -86,7 +86,7 @@ async def handle_remove_audio(client, message):
                 duration = metadata["duration"]
                 attributes = [DocumentAttributeVideo(duration=duration, w=width, h=height, supports_streaming=True)]
                 caption = f"Here's your cleaned video file. Duration: {duration_sec} seconds. Size: {size_mb} MB"
-                await ms.edit_text("Uploading media...")
+                uploader = await message.reply_text("Uploading media...")
             else:
                 caption = "Here's your cleaned video file."
             
@@ -97,7 +97,7 @@ async def handle_remove_audio(client, message):
                 attributes=attributes,
                 video=output_file_no_audio,
                 progress=progress_for_pyrogram,
-                progress_args=("Uploading...", ms, time.time())
+                progress_args=("Uploading...", uploader, time.time())
             )
         else:
             await message.reply_text("Failed to process the video. Please try again later.")
