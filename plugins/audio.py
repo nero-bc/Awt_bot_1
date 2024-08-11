@@ -10,8 +10,11 @@ from concurrent.futures import ThreadPoolExecutor
 from flask import Flask, request, jsonify
 from pyrogram import Client, filters
 from plugins import start
+from LOCAL.localisation import JPG3 
 from helper.utils import progress_for_pyrogram
 from plugins import extractor 
+from ethon.pyfunc import video_metadata, bash
+from telethon.tl.types import DocumentAttributeVideo
 from pyrogram.errors import FloodWait
 
 app = Flask(__name__)
@@ -76,20 +79,22 @@ async def handle_remove_audio(client, message):
         success = await loop.run_in_executor(executor, remove_audio, file_path, output_file_no_audio)
 
         if success:
-            details = await get_video_details(output_file_no_audio)
-            if details:
-                duration = details.get('duration', 'Unknown')
-                size = details.get('size', 'Unknown')
-                size_mb = round(int(size) / (1024 * 1024), 2)
-                duration_sec = round(float(duration))
+            metadata = await video_metadata(output_file_no_audio)
+            if metadata:
+                width = metadata["width"]
+                height = metadata["height"]
+                duration = metadata["duration"]
+                attributes = [DocumentAttributeVideo(duration=duration, w=width, h=height, supports_streaming=True)]
                 caption = f"Here's your cleaned video file. Duration: {duration_sec} seconds. Size: {size_mb} MB"
-                ms = await message.reply_text("Uploading media...")
+                await ms.edit_text("Uploading media...")
             else:
                 caption = "Here's your cleaned video file."
             
             await client.send_video(
                 chat_id=message.chat.id,
                 caption= caption,
+                thumb=JPG3,
+                attributes=attributes,
                 video=output_file_no_audio,
                 progress=progress_for_pyrogram,
                 progress_args=("Uploading...", ms, time.time())
