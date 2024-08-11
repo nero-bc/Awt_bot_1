@@ -5,13 +5,13 @@ import sys
 import math
 import time
 import asyncio
-import logging 
+import logging
 from concurrent.futures import ThreadPoolExecutor
 from flask import Flask, request, jsonify
 from pyrogram import Client, filters
 from plugins import start
 from helper.utils import progress_for_pyrogram
-from plugins import extractor 
+from plugins import extractor
 from pyrogram.errors import FloodWait
 
 app = Flask(__name__)
@@ -35,7 +35,6 @@ def remove_audio(input_file, output_file):
     success, _ = run_command(command)
     return success
 
-
 async def get_video_details(file_path):
     command = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration,size', '-of', 'default=noprint_wrappers=1', file_path]
     success, output = run_command(command)
@@ -46,6 +45,27 @@ async def get_video_details(file_path):
             details[key] = value
         return details
     return None
+
+def create_thumbnail_with_info(video_file, thumbnail_file, duration, size_mb):
+    # Extract a frame from the video as the base for the thumbnail
+    command = [
+        'ffmpeg', '-i', video_file, '-vf', 'thumbnail', '-frames:v', '1', thumbnail_file
+    ]
+    success, _ = run_command(command)
+
+    if not success:
+        return False
+
+    # Overlay the duration and size info onto the thumbnail
+    text = f"{int(duration//60)}:{int(duration%60):02d} | {size_mb} MB"
+    command = [
+        'ffmpeg', '-i', thumbnail_file, '-vf',
+        f"drawtext=text='{text}':fontcolor=white:fontsize=24:x=10:y=H-th-10",
+        '-codec:a', 'copy', thumbnail_file
+    ]
+    success, _ = run_command(command)
+
+    return success
 
 @Client.on_message(filters.command("remove_audio"))
 async def handle_remove_audio(client, message):
@@ -58,14 +78,14 @@ async def handle_remove_audio(client, message):
 
     try:
         file_path = await client.download_media(
-            media, 
-            progress=progress_for_pyrogram, 
+            media,
+            progress=progress_for_pyrogram,
             progress_args=("Downloading started..", ms, time.time())
         )
     except Exception as e:
         print(e)
-        return await ms.edit(f"An error occured while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
-    
+        return await ms.edit(f"An error occured while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False)
+
     try:
         await ms.edit_text("Please wait processing...")
 
@@ -78,25 +98,33 @@ async def handle_remove_audio(client, message):
         if success:
             details = await get_video_details(output_file_no_audio)
             if details:
-                duration = details.get('duration', 'Unknown')
-                size = details.get('size', 'Unknown')
+                duration = float(details.get('duration', '0'))
+                size = details.get('size', '0')
                 size_mb = round(int(size) / (1024 * 1024), 2)
-                duration_sec = round(float(duration))
-                caption = f"Here's your cleaned video file. Duration: {duration_sec} seconds. Size: {size_mb} MB"
-                uploader = await ms.edit_text("Uploading media...")
+
+                # Create a thumbnail with video size and duration info
+                thumbnail_file = tempfile.mktemp(suffix=".png")
+                thumbnail_created = create_thumbnail_with_info(output_file_no_audio, thumbnail_file, duration, size_mb)
+                if thumbnail_created:
+                    caption = f"Here's your cleaned video file. Duration: {int(duration)} seconds. Size: {size_mb} MB"
+                    uploader = await ms.edit_text("Uploading media...")
+
+                    await client.send_video(
+                        chat_id=message.chat.id,
+                        caption=caption,
+                        video=output_file_no_audio,
+                        thumb=thumbnail_file,
+                        progress=progress_for_pyrogram,
+                        progress_args=("Uploading...", uploader, time.time())
+                    )
+                else:
+                    await message.reply_text("Failed to create a thumbnail for the video.")
             else:
-                caption = "Here's your cleaned video file."
-            
-            await client.send_video(
-                chat_id=message.chat.id,
-                caption= caption,
-                video=output_file_no_audio,
-                progress=progress_for_pyrogram,
-                progress_args=("Uploading...", uploader, time.time())
-            )
+                await message.reply_text("Failed to retrieve video details.")
+
         else:
             await message.reply_text("Failed to process the video. Please try again later.")
-        
+
         await uploader.delete()
 
         # Safely remove files
@@ -109,6 +137,11 @@ async def handle_remove_audio(client, message):
             os.remove(output_file_no_audio)
         except Exception as e:
             logging.error(f"Failed to remove file: {output_file_no_audio}. Error: {e}")
-            
+
+        try:
+            os.remove(thumbnail_file)
+        except Exception as e:
+            logging.error(f"Failed to remove file: {thumbnail_file}. Error: {e}")
+
     except Exception as e:
         await message.reply_text(f"An error occurred: {e}")
