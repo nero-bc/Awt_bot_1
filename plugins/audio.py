@@ -118,14 +118,11 @@ async def handle_remove_audio(client, message):
                         progress_args=("Uploading...", uploader, time.time())
                     )
                 else:
-                    await message.reply_text("Failed to create a thumbnail for the video.")
+                    await ms.edit_text("Failed to create a thumbnail for the video.")
             else:
-                await message.reply_text("Failed to retrieve video details.")
-
+                await ms.edit_text("Failed to retrieve video details.")
         else:
-            await message.reply_text("Failed to process the video. Please try again later.")
-
-        await uploader.delete()
+            await ms.edit_text("Failed to process the video. Please try again later.")
 
         # Safely remove files
         try:
