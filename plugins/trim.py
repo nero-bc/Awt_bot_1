@@ -119,7 +119,7 @@ async def handle_trim_video(client, message):
             logging.error(f"Failed to remove file: {file_path}. Error: {e}")
 
         try:
-            os.remove(output_file_no_audio)
+            os.remove(output_file_trimmed)
         except Exception as e:
             logging.error(f"Failed to remove file: {output_file_no_audio}. Error: {e}")
             
