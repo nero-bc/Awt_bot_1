@@ -13,8 +13,6 @@ from plugins import start
 from LOCAL.localisation import JPG3 
 from helper.utils import progress_for_pyrogram
 from plugins import extractor 
-from ethon.pyfunc import video_metadata, bash
-from telethon.tl.types import DocumentAttributeVideo
 from pyrogram.errors import FloodWait
 
 app = Flask(__name__)
