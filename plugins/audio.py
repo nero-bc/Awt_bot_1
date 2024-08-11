@@ -98,21 +98,3 @@ async def handle_remove_audio(client, message):
 
         os.remove(file_path)
         os.remove(output_file_no_audio)
-
-
-@app.route('/process', methods=['POST'])
-def process_request():
-    data = request.json
-    input_file = data['input_file']
-    output_file = data['output_file']
-    action = data['action']
-
-    if action == 'remove_audio':
-        success = executor.submit(remove_audio, input_file, output_file).result()
-    else:
-        return jsonify({"error": "Invalid action"}), 400
-
-    if not success:
-        return jsonify({"status": "failure", "message": "Processing failed"}), 500
-
-    return jsonify({"status": "success", "output_file": output_file})
