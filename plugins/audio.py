@@ -68,46 +68,50 @@ async def handle_remove_audio(client, message):
         return
 
     media = message.reply_to_message.video or message.reply_to_message.document
-    downloading_message = await message.reply_text("Downloading media...")
+    ms = await message.reply_text("Downloading media...")
 
-    start_time = time.time()
-    file_path = await client.download_media(
-        media, 
-        progress=progress_for_pyrogram, 
-        progress_args=(downloading_message, start_time, "Downloading media...")
-    )
-    await downloading_message.edit_text("Please wait processing...")
-
-    base_name = os.path.splitext(os.path.basename(file_path))[0]
-    output_file_no_audio = tempfile.mktemp(suffix=f"_{base_name}_noaudio.mp4")
-
-    loop = asyncio.get_event_loop()
-    success = await loop.run_in_executor(executor, remove_audio, file_path, output_file_no_audio)
-
-    if success:
-        details = await get_video_details(output_file_no_audio)
-        if details:
-            duration = details.get('duration', 'Unknown')
-            size = details.get('size', 'Unknown')
-            size_mb = round(int(size) / (1024 * 1024), 2)
-            duration_sec = round(float(duration))
-            caption = f"Here's your cleaned video file. Duration: {duration_sec} seconds. Size: {size_mb} MB"
-        else:
-            caption = "Here's your cleaned video file."
-            
-        uploading_message = await message.reply_text("Uploading media...")
-        start_time = time.time()
-        await client.send_video(
-            chat_id=message.chat.id,
-            video=output_file_no_audio,
-            progress=progress_for_pyrogram,
-            progress_args=(uploading_message, start_time, "Uploading media...")
+    try:
+        file_path = await client.download_media(
+            media, 
+            progress=progress_for_pyrogram, 
+            progress_args=("Downloading started..", ms, time.time())
         )
-    else:
-        await message.reply_text("Failed to process the video. Please try again later.")
+    except Exception as e:
+        print(e)
+        return await edit.edit(f"An error occured while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
+    try:
+        await downloading_message.edit_text("Please wait processing...")
 
-    os.remove(file_path)
-    os.remove(output_file_no_audio)
+        base_name = os.path.splitext(os.path.basename(file_path))[0]
+        output_file_no_audio = tempfile.mktemp(suffix=f"_{base_name}_noaudio.mp4")
+
+        loop = asyncio.get_event_loop()
+        success = await loop.run_in_executor(executor, remove_audio, file_path, output_file_no_audio)
+
+        if success:
+            details = await get_video_details(output_file_no_audio)
+            if details:
+                duration = details.get('duration', 'Unknown')
+                size = details.get('size', 'Unknown')
+                size_mb = round(int(size) / (1024 * 1024), 2)
+                duration_sec = round(float(duration))
+                caption = f"Here's your cleaned video file. Duration: {duration_sec} seconds. Size: {size_mb} MB"
+                uploader = await message.reply_text("Uploading media...")
+            else:
+                caption = "Here's your cleaned video file."
+            
+            await client.send_video(
+                chat_id=message.chat.id,
+                caption= caption,
+                video=output_file_no_audio,
+                progress=progress_for_pyrogram,
+                progress_args=("Uploading...", uploader, time.time() )
+            )
+        else:
+            await message.reply_text("Failed to process the video. Please try again later.")
+
+        os.remove(file_path)
+        os.remove(output_file_no_audio)
 
 @Client.on_message(filters.command("trim_video"))
 async def handle_trim_video(client, message):
