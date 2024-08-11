@@ -14,6 +14,14 @@ from helper.utils import progress_for_pyrogram
 from plugins import extractor 
 from pyrogram.errors import FloodWait
 
+app = Flask(__name__)
+
+# Thread pool for async processing
+executor = ThreadPoolExecutor(max_workers=4)
+
+# Configure logging
+logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 def run_command(command):
     try:
         result = subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
