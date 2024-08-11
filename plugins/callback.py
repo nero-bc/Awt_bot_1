@@ -39,29 +39,30 @@ async def cb_handler(client, query):
             disable_web_page_preview=True
         )
         return
+
     elif data == "help":
         await query.answer()
         keyboard = InlineKeyboardMarkup([[
                 # Don't change the owner details if you change the bot not work  #
-                   InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
+                InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
                 ],[
-                   InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data = "close"),
-                   InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data = "start")
+                InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data = "close"),
+                InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data = "start")
             ]]) 
-        
         await query.message.edit_text(
             text=Txt.HELP_TXT,
             disable_web_page_preview=True,
         )
         return
+
     elif data == "about":
         await query.answer()
         keyboard = InlineKeyboardMarkup([[
                 #⚠️ Don't change the owner details if you change the bot not work ⚠️ #
-                   InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
+                InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
                 ],[
-                   InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data = "close"),
-                   InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data = "start")
+                InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data = "close"),
+                InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data = "start")
             ]])  
 
         await query.message.edit_text(
@@ -69,6 +70,15 @@ async def cb_handler(client, query):
             disable_web_page_preview = True,
         )
         return
+
+    elif data == "close":
+        try:
+            await query.message.delete()
+            await query.message.reply_to_message.delete()
+            await query.message.continue_propagation()
+        except:
+            await query.message.delete()
+            await query.message.continue_propagation()
 
     elif data == "download_file":
         await query.answer()
@@ -82,7 +92,7 @@ async def cb_handler(client, query):
 
     elif data == "handle_trim_video":
         await query.answer()
-        await handle_trim_video(client, query.message)
+        await query.message.reply_text("please reply to a video or file in this Format eg: /trim_video 00:00:00 00:00:20")
         await query.message.delete()
 
     elif data == "set_merge_audio":
