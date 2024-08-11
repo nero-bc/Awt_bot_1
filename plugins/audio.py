@@ -84,7 +84,7 @@ async def handle_remove_audio(client, message):
                 height = metadata["height"]
                 duration = metadata["duration"]
                 attributes = [DocumentAttributeVideo(duration=duration, w=width, h=height, supports_streaming=True)]
-                caption = f"Here's your cleaned video file. Duration: {duration} seconds. Size: {metadata['size']} MB"
+                caption = f"Here's your cleaned video file. MB"
                 uploader = await message.reply_text("Uploading media...")
             else:
                 caption = "Here's your cleaned video file."
