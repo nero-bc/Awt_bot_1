@@ -2,17 +2,13 @@ import os
 import tempfile
 import subprocess
 import sys
-import math
 import time
 import asyncio
 import logging 
 from concurrent.futures import ThreadPoolExecutor
-from flask import Flask, request, jsonify
+from flask import Flask
 from pyrogram import Client, filters
-from plugins import start
 from helper.utils import progress_for_pyrogram
-from plugins import extractor 
-from pyrogram.errors import FloodWait
 
 app = Flask(__name__)
 
@@ -58,19 +54,22 @@ async def get_video_details(file_path):
 
 @Client.on_message(filters.command("trim_video"))
 async def handle_trim_video(client, message):
-    args = message.command
-    if len(args) != 3:
-        await message.reply_text("Usage: /trim_video <start_time> <end_time>\nExample: /trim_video 00:00:10 00:00:20")
-        return
-
     if not message.reply_to_message or not (message.reply_to_message.video or message.reply_to_message.document):
         await message.reply_text("Please reply to a video or document message with the /trim_video command.")
         return
+    
+    # Ask for the start time
+    ms = await message.reply_text("Please enter the start time (format: HH:MM:SS):")
+    start_time = await client.listen(message.chat.id, filters.text)
+    start_time = start_time.text
+    
+    # Ask for the end time
+    await ms.edit_text("Please enter the end time (format: HH:MM:SS):")
+    end_time = await client.listen(message.chat.id, filters.text)
+    end_time = end_time.text
 
-    start_time = args[1]
-    end_time = args[2]
     media = message.reply_to_message.video or message.reply_to_message.document
-    ms = await message.reply_text("Downloading media...")
+    await ms.edit_text("Downloading your media...")
 
     try:
         file_path = await client.download_media(
@@ -78,10 +77,9 @@ async def handle_trim_video(client, message):
             progress=progress_for_pyrogram, 
             progress_args=("Downloading your video.", ms, time.time())
         ) 
-
     except Exception as e:
-        print(e)
-        return await ms.edit(f"An error occured while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
+        logging.error(f"Download error: {e}")
+        return await ms.edit(f"An error occurred while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
     
     try:
         await ms.edit_text("Processing your file ...")
@@ -107,12 +105,15 @@ async def handle_trim_video(client, message):
             await client.send_video(
                 chat_id=message.chat.id,
                 video=output_file_trimmed,
+                caption=caption,
                 progress=progress_for_pyrogram,
-                progress_args=("Uploading Video...", uploader, time.time())
+                progress_args=("Uploading Video...", ms, time.time())
             )
         else:
             await message.reply_text("Failed to process the video. Please try again later.")
-        await uploader.delete()
+        
+        await ms.delete()
+
         try:
             os.remove(file_path)
         except Exception as e:
@@ -121,7 +122,7 @@ async def handle_trim_video(client, message):
         try:
             os.remove(output_file_trimmed)
         except Exception as e:
-            logging.error(f"Failed to remove file: {output_file_no_audio}. Error: {e}")
+            logging.error(f"Failed to remove file: {output_file_trimmed}. Error: {e}")
             
     except Exception as e:
         await message.reply_text(f"An error occurred: {e}")
