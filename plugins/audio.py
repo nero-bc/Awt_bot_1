@@ -80,12 +80,10 @@ async def handle_remove_audio(client, message):
         if success:
             details = await get_video_details(output_file_no_audio)
             if details:
-                metadata = await video_metadata(output_file_no_audio)
-                width = metadata["width"]
-                height = metadata["height"]
-                duration = metadata["duration"]
-                attributes = [DocumentAttributeVideo(duration=duration, w=width, h=height, supports_streaming=True)]
-                caption = f"Here's your cleaned video file. MB"
+                duration = details.get('duration', 'Unknown')
+                size = details.get('size', 'Unknown')
+                size_mb = round(int(size) / (1024 * 1024), 2)
+                duration_sec = round(float(duration))
                 uploader = await message.reply_text("Uploading media...")
             else:
                 caption = "Here's your cleaned video file."
