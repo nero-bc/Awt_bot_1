@@ -57,6 +57,7 @@ async def get_user_input(client, chat_id, prompt):
     response = await client.listen(chat_id, filters.text)
     return response.text
 
+@Client.on_message(filters.command("trim_video"))
 async def handle_trim_video(client, message):
     chat_id = message.chat.id
 
