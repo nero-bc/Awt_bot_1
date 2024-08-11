@@ -36,7 +36,7 @@ async def trim_audio(input_file, output_file, start_time, end_time):
         return None
 
 # /trim_audio command handler
-@app.on_message(filters.command("trim_audio") & filters.reply)
+@Client.on_message(filters.command("trim_audio") & filters.reply)
 async def trim_audio_handler(client, message):
     if not message.reply_to_message.audio:
         await message.reply("Please reply to an audio file with the command.")
