@@ -25,7 +25,7 @@ async def receive_audio(client, message: Message):
     user_id = message.from_user.id
     media_file = message.audio
     start_time = time.time()
-    ms = await ms.edit_text("Downloading audio...")
+    ms = await message.reply_text("Downloading audio...")
 
     try:
         media_path = await message.download(
@@ -37,7 +37,7 @@ async def receive_audio(client, message: Message):
         user_media_files[user_id].append(media_path)
 
         if len(user_media_files[user_id]) == 1:
-            await progress_message.edit_text("First audio received. Now send the second audio.")
+            await ms.edit_text("First audio received. Now send the second audio.")
         elif len(user_media_files[user_id]) == 2:
             await ms.edit_text("Both audios received. Merging them now...")
             await merge_audios(client, message, user_id)
