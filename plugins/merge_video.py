@@ -102,4 +102,4 @@ async def merge_video_and_audio(client, message, user_id):
 
     # Remove user data
     del user_media_files[user_id]
-    del user_merge_mode[user_id]    
+    del user_merge_mode[user_id]
