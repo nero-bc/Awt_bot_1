@@ -52,77 +52,89 @@ async def get_video_details(file_path):
         return details
     return None
 
-@Client.on_message(filters.command("trim_video"))
+async def get_user_input(client, chat_id, prompt):
+    await client.send_message(chat_id, prompt)
+    response = await client.listen(chat_id, filters.text)
+    return response.text
+
 async def handle_trim_video(client, message):
-    if not message.reply_to_message or not (message.reply_to_message.video or message.reply_to_message.document):
-        await message.reply_text("Please reply to a video or document message with the /trim_video command.")
-        return
-    
-    # Ask for the start time
-    ms = await message.reply_text("Please enter the start time (format: HH:MM:SS):")
-    start_time = await client.listen(message.chat.id, filters.text)
-    start_time = start_time.text
-    
-    # Ask for the end time
-    await ms.edit_text("Please enter the end time (format: HH:MM:SS):")
-    end_time = await client.listen(message.chat.id, filters.text)
-    end_time = end_time.text
-
-    media = message.reply_to_message.video or message.reply_to_message.document
-    await ms.edit_text("Downloading your media...")
+    chat_id = message.chat.id
 
     try:
-        file_path = await client.download_media(
-            media, 
-            progress=progress_for_pyrogram, 
-            progress_args=("Downloading your video.", ms, time.time())
-        ) 
-    except Exception as e:
-        logging.error(f"Download error: {e}")
-        return await ms.edit(f"An error occurred while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
-    
-    try:
-        await ms.edit_text("Processing your file ...")
-
-        base_name = os.path.splitext(os.path.basename(file_path))[0]
-        output_file_trimmed = tempfile.mktemp(suffix=f"_{base_name}_trimmed.mp4")
-
-        future = executor.submit(trim_video, file_path, start_time, end_time, output_file_trimmed)
-        success = future.result()
-
-        if success:
-            details = await get_video_details(output_file_trimmed)
-            if details:
-                duration = details.get('duration', 'Unknown')
-                size = details.get('size', 'Unknown')
-                size_mb = round(int(size) / (1024 * 1024), 2)
-                duration_sec = round(float(duration))
-                caption = f"Here's your trimmed video file. Duration: {duration_sec} seconds. Size: {size_mb} MB"
-                uploader = await ms.edit_text("Uploading video..")
-            else:
-                caption = "Here's your trimmed video file."
-
-            await client.send_video(
-                chat_id=message.chat.id,
-                video=output_file_trimmed,
-                caption=caption,
-                progress=progress_for_pyrogram,
-                progress_args=("Uploading Video...", ms, time.time())
-            )
-        else:
-            await message.reply_text("Failed to process the video. Please try again later.")
+        # Ask for the start time
+        start_time = await get_user_input(client, chat_id, "Please enter the start time (format: HH:MM:SS):")
         
-        await ms.delete()
+        # Validate start time format
+        if not start_time:
+            await client.send_message(chat_id, "Start time is invalid or not received. Please try again.")
+            return
+        
+        # Ask for the end time
+        end_time = await get_user_input(client, chat_id, "Please enter the end time (format: HH:MM:SS):")
+        
+        # Validate end time format
+        if not end_time:
+            await client.send_message(chat_id, "End time is invalid or not received. Please try again.")
+            return
+
+        media = message.reply_to_message.video or message.reply_to_message.document
+        ms = await message.reply_text("Downloading media...")
 
         try:
-            os.remove(file_path)
+            file_path = await client.download_media(
+                media, 
+                progress=progress_for_pyrogram, 
+                progress_args=("Downloading your video.", ms, time.time())
+            ) 
         except Exception as e:
-            logging.error(f"Failed to remove file: {file_path}. Error: {e}")
-
+            logging.error(f"Download error: {e}")
+            return await ms.edit(f"An error occurred while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
+        
         try:
-            os.remove(output_file_trimmed)
-        except Exception as e:
-            logging.error(f"Failed to remove file: {output_file_trimmed}. Error: {e}")
+            await ms.edit_text("Processing your file ...")
+
+            base_name = os.path.splitext(os.path.basename(file_path))[0]
+            output_file_trimmed = tempfile.mktemp(suffix=f"_{base_name}_trimmed.mp4")
+
+            future = executor.submit(trim_video, file_path, start_time, end_time, output_file_trimmed)
+            success = future.result()
+
+            if success:
+                details = await get_video_details(output_file_trimmed)
+                if details:
+                    duration = details.get('duration', 'Unknown')
+                    size = details.get('size', 'Unknown')
+                    size_mb = round(int(size) / (1024 * 1024), 2)
+                    duration_sec = round(float(duration))
+                    caption = f"Here's your trimmed video file. Duration: {duration_sec} seconds. Size: {size_mb} MB"
+                    uploader = await ms.edit_text("Uploading video..")
+                else:
+                    caption = "Here's your trimmed video file."
+
+                await client.send_video(
+                    chat_id=message.chat.id,
+                    video=output_file_trimmed,
+                    caption=caption,
+                    progress=progress_for_pyrogram,
+                    progress_args=("Uploading Video...", ms, time.time())
+                )
+            else:
+                await message.reply_text("Failed to process the video. Please try again later.")
             
+            await ms.delete()
+
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                logging.error(f"Failed to remove file: {file_path}. Error: {e}")
+
+            try:
+                os.remove(output_file_trimmed)
+            except Exception as e:
+                logging.error(f"Failed to remove file: {output_file_trimmed}. Error: {e}")
+                
+        except Exception as e:
+            await message.reply_text(f"An error occurred: {e}")
+
     except Exception as e:
-        await message.reply_text(f"An error occurred: {e}")
+        await client.send_message(chat_id, f"An error occurred while processing: {e}")
