@@ -35,8 +35,22 @@ async def receive_video(client, message: Message):
     progress_message = await message.reply_text(f"Downloading {media_type}...")
 
     try:
+        # Ensure file extension is correct for downloading
+        file_extension = os.path.splitext(media_file.file_name)[1].lower()
+        if not file_extension:
+            file_extension = '.mp4' if media_type == 'video' else '.mp3'
+
+        # Handle additional video and audio file extensions
+        valid_video_extensions = ['.mp4', '.mkv', '.mov']
+        valid_audio_extensions = ['.mp3', '.aac', '.m4a']
+
+        if media_type == 'video' and file_extension not in valid_video_extensions:
+            file_extension = '.mp4'
+        elif media_type == 'audio' and file_extension not in valid_audio_extensions:
+            file_extension = '.mp3'
+
         media_path = await message.download(
-            file_name=f"{DOWNLOAD_DIR}{media_file.file_name}",
+            file_name=f"{DOWNLOAD_DIR}{media_file.file_unique_id}{file_extension}",
             progress=progress,
             progress_args=(progress_message, start_time, f"Downloading {media_type}")
         )
@@ -45,14 +59,23 @@ async def receive_video(client, message: Message):
 
         if len(user_media_files[user_id]) == 1 and media_type == "video":
             await progress_message.edit_text("Video received. Now send the audio file.")
-        elif len(user_media_files[user_id]) == 2 and any('.mp4' in file for file in user_media_files[user_id]):
+        elif len(user_media_files[user_id]) == 2 and any(file.endswith(valid_video_extensions) for file in user_media_files[user_id]):
             await progress_message.edit_text("Both video and audio received. Merging them now...")
             await merge_video_and_audio(client, message, user_id)
     except Exception as e:
         await progress_message.edit_text(f"Error during download: {e}")
 
 async def merge_video_and_audio(client, message, user_id):
-    video, audio = user_media_files[user_id]
+    valid_video_extensions = ['.mp4', '.mkv', '.mov']
+    valid_audio_extensions = ['.mp3', '.aac', '.m4a']
+
+    video = next((file for file in user_media_files[user_id] if file.endswith(tuple(valid_video_extensions))), None)
+    audio = next((file for file in user_media_files[user_id] if file.endswith(tuple(valid_audio_extensions))), None)
+
+    if not video or not audio:
+        await message.reply_text("Error: Video or audio file not found.")
+        return
+
     output_path = f"{DOWNLOAD_DIR}merged_video_{user_id}.mp4"
 
     command = [
