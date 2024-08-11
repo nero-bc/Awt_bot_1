@@ -82,17 +82,17 @@ async def cb_handler(client, query):
 
     elif data == "handle_trim_video":
         await query.answer()
-        await query.message.reply_text("Please use the command in the format: /trim_video <start_time> <end_time>.\nExample: /trim_video 00:00:10 00:00:20")
+        await handle_trim_video(client, query.message)
         await query.message.delete()
 
     elif data == "set_merge_audio":
         await query.answer()
-        await received_audio(client, query.message)  # Use the function from merge.py
+        await query.message.reply_text("Now Click 👉 /merge_audio to start")# Use the function from merge.py
         await query.message.delete()
 
     elif data == "set_merge_video":
         await query.answer()
-        await received_video(client, query.message)  # Use the function from merge.py
+        await query.message.reply_text("Now Click 👉 /merge_video to start")  # Use the function from merge.py
         await query.message.delete()
 
     elif data == "progress_msg":
