@@ -64,9 +64,10 @@ async def handle_remove_audio(client, message):
         )
     except Exception as e:
         print(e)
-        return await edit.edit(f"An error occured while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
+        return await ms.edit(f"An error occured while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
+    
     try:
-        await downloading_message.edit_text("Please wait processing...")
+        await ms.edit_text("Please wait processing...")
 
         base_name = os.path.splitext(os.path.basename(file_path))[0]
         output_file_no_audio = tempfile.mktemp(suffix=f"_{base_name}_noaudio.mp4")
@@ -91,11 +92,23 @@ async def handle_remove_audio(client, message):
                 caption= caption,
                 video=output_file_no_audio,
                 progress=progress_for_pyrogram,
-                progress_args=("Uploading...", uploader, time.time() )
+                progress_args=("Uploading...", uploader, time.time())
             )
         else:
             await message.reply_text("Failed to process the video. Please try again later.")
         
         await ms.delete()
-        os.remove(file_path)
-        os.remove(output_file_no_audio)
+
+        # Safely remove files
+        try:
+            os.remove(file_path)
+        except Exception as e:
+            logging.error(f"Failed to remove file: {file_path}. Error: {e}")
+
+        try:
+            os.remove(output_file_no_audio)
+        except Exception as e:
+            logging.error(f"Failed to remove file: {output_file_no_audio}. Error: {e}")
+            
+    except Exception as e:
+        await message.reply_text(f"An error occurred: {e}")
