@@ -36,6 +36,7 @@ def remove_audio(input_file, output_file):
     success, _ = run_command(command)
     return success
 
+
 async def get_video_details(file_path):
     command = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration,size', '-of', 'default=noprint_wrappers=1', file_path]
     success, output = run_command(command)
@@ -64,7 +65,7 @@ async def handle_remove_audio(client, message):
         )
     except Exception as e:
         print(e)
-        return await ms.edit(f"An error occurred while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
+        return await ms.edit(f"An error occured while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
     
     try:
         await ms.edit_text("Please wait processing...")
@@ -73,7 +74,7 @@ async def handle_remove_audio(client, message):
         output_file_no_audio = tempfile.mktemp(suffix=f"_{base_name}_noaudio.mp4")
 
         loop = asyncio.get_event_loop()
-        success = await loop.run_in_executor(executor, remove_audio, file_path, output_file_no_audio)  # Await the method call
+        success = await loop.run_in_executor(executor, remove_audio, file_path, output_file_no_audio)
 
         if success:
             details = await get_video_details(output_file_no_audio)
@@ -82,15 +83,15 @@ async def handle_remove_audio(client, message):
                 size = details.get('size', 'Unknown')
                 size_mb = round(int(size) / (1024 * 1024), 2)
                 duration_sec = round(float(duration))
-                caption = f"Here's your cleaned video file. Duration: {duration} seconds. Size: {metadata['size']} MB"
-                uploader = await message.reply_text("Uploading media...")
+                caption = f"Here's your cleaned video file. Duration: {duration_sec} seconds. Size: {size_mb} MB"
+                uploader = await ms.edit_text("Uploading media...")
             else:
                 caption = "Here's your cleaned video file."
             
             await client.send_video(
                 chat_id=message.chat.id,
-                caption=caption,
-                thumb=JPG3,
+                caption= caption,
+                thumb = JPG3,
                 video=output_file_no_audio,
                 progress=progress_for_pyrogram,
                 progress_args=("Uploading...", uploader, time.time())
