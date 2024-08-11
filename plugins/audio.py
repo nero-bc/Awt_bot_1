@@ -83,7 +83,7 @@ async def handle_remove_audio(client, message):
                 size_mb = round(int(size) / (1024 * 1024), 2)
                 duration_sec = round(float(duration))
                 caption = f"Here's your cleaned video file. Duration: {duration_sec} seconds. Size: {size_mb} MB"
-                uploader = await message.reply_text("Uploading media...")
+                ms = await message.reply_text("Uploading media...")
             else:
                 caption = "Here's your cleaned video file."
             
@@ -92,7 +92,7 @@ async def handle_remove_audio(client, message):
                 caption= caption,
                 video=output_file_no_audio,
                 progress=progress_for_pyrogram,
-                progress_args=("Uploading...", uploader, time.time())
+                progress_args=("Uploading...", ms, time.time())
             )
         else:
             await message.reply_text("Failed to process the video. Please try again later.")
