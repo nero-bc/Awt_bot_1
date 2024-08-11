@@ -84,6 +84,7 @@ async def handle_remove_audio(client, message):
                 size = details.get('size', 'Unknown')
                 size_mb = round(int(size) / (1024 * 1024), 2)
                 duration_sec = round(float(duration))
+                caption = f"Here's your cleaned video file. Duration: {duration} seconds. Size: {metadata['size']} MB"
                 uploader = await message.reply_text("Uploading media...")
             else:
                 caption = "Here's your cleaned video file."
@@ -92,7 +93,6 @@ async def handle_remove_audio(client, message):
                 chat_id=message.chat.id,
                 caption=caption,
                 thumb=JPG3,
-                attributes=attributes,
                 video=output_file_no_audio,
                 progress=progress_for_pyrogram,
                 progress_args=("Uploading...", uploader, time.time())
