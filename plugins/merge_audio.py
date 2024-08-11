@@ -18,7 +18,7 @@ async def set_merge_audio(client, message: Message):
     user_id = message.from_user.id
     user_merge_mode[user_id] = "audio"
     user_media_files[user_id] = []
-    l = await message.reply_text("Send the first audio file.")
+    await message.reply_text("Send the first audio file.")
 
 @Client.on_message((filters.audio) & ~filters.forwarded)
 async def receive_audio(client, message: Message):
