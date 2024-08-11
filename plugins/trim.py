@@ -47,3 +47,77 @@ async def get_video_details(file_path):
             details[key] = value
         return details
     return None
+
+@Client.on_message(filters.command("trim_video"))
+async def handle_trim_video(client, message):
+    args = message.command
+    if len(args) != 3:
+        await message.reply_text("Usage: /trim_video <start_time> <end_time>\nExample: /trim_video 00:00:10 00:00:20")
+        return
+
+    if not message.reply_to_message or not (message.reply_to_message.video or message.reply_to_message.document):
+        await message.reply_text("Please reply to a video or document message with the /trim_video command.")
+        return
+
+    start_time = args[1]
+    end_time = args[2]
+    media = message.reply_to_message.video or message.reply_to_message.document
+    downloading_message = await message.reply_text("Downloading media...")
+
+    start_time = time.time()
+    file_path = await client.download_media(
+        media, 
+        progress=progress_for_pyrogram, 
+        progress_args=(downloading_message, start_time, "Downloading media...")
+    ) 
+    await downloading_message.edit_text("Download complete. Processing...")
+
+    base_name = os.path.splitext(os.path.basename(file_path))[0]
+    output_file_trimmed = tempfile.mktemp(suffix=f"_{base_name}_trimmed.mp4")
+
+    future = executor.submit(trim_video, file_path, start_time, end_time, output_file_trimmed)
+    success = future.result()
+
+    if success:
+        details = await get_video_details(output_file_trimmed)
+        if details:
+            duration = details.get('duration', 'Unknown')
+            size = details.get('size', 'Unknown')
+            size_mb = round(int(size) / (1024 * 1024), 2)
+            duration_sec = round(float(duration))
+            caption = f"Here's your trimmed video file. Duration: {duration_sec} seconds. Size: {size_mb} MB"
+        else:
+            caption = "Here's your trimmed video file."
+
+        uploading_message = await message.reply_text("Uploading media...")
+        start_time = time.time()
+        await client.send_video(
+            chat_id=message.chat.id,
+            video=output_file_trimmed,
+            progress=progress_for_pyrogram,
+            progress_args=(uploading_message, start_time, "Uploading media...")
+        )
+    else:
+        await message.reply_text("Failed to process the video. Please try again later.")
+
+    os.remove(file_path)
+    os.remove(output_file_trimmed)
+
+@app.route('/process', methods=['POST'])
+def process_request():
+    data = request.json
+    input_file = data['input_file']
+    output_file = data['output_file']
+    action = data['action']
+
+    if action == 'trim_video':
+        start_time = data['start_time']
+        end_time = data['end_time']
+        success = executor.submit(trim_video, input_file, start_time, end_time, output_file).result()
+    else:
+        return jsonify({"error": "Invalid action"}), 400
+
+    if not success:
+        return jsonify({"status": "failure", "message": "Processing failed"}), 500
+
+    return jsonify({"status": "success", "output_file": output_file})
