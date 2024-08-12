@@ -51,7 +51,7 @@ async def cb_handler(client, query: CallbackQuery):
 
     elif data == "about":
         await query.answer()
-        keyboard = InlineKeyboardMarkup([[
+        keyboard = InlineKeyboardMarkup([
             [InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")],
             [InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data="close"),
              InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data="start")]
