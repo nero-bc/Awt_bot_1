@@ -36,16 +36,16 @@ def remove_audio(input_file, output_file):
     success, _ = run_command(command)
     return success
 
-async def get_video_details(file_path):
-    command = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration,size', '-of', 'default=noprint_wrappers=1', file_path]
+def get_video_duration(file_path):
+    command = ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1:nokey=1', file_path]
     success, output = run_command(command)
     if success:
-        details = {}
-        for line in output.splitlines():
-            key, value = line.split('=')
-            details[key] = value
-        return details
-    return None
+        try:
+            return float(output.strip())
+        except ValueError:
+            logging.error("Failed to parse duration output")
+            return 0
+    return 0
 
 def create_play_button_image():
     # Create a blank image with a transparent background
@@ -70,7 +70,7 @@ def create_thumbnail(input_file, output_thumbnail, duration, size):
     
     if success:
         # Convert duration to MM:SS format
-        total_seconds = int(float(duration))
+        total_seconds = int(duration)
         minutes = total_seconds // 60
         seconds = total_seconds % 60
         duration_text = f"{minutes:02}:{seconds:02}"
@@ -130,30 +130,28 @@ async def handle_remove_audio(client, message):
         success = await loop.run_in_executor(executor, remove_audio, file_path, output_file_no_audio)
 
         if success:
-            details = await get_video_details(output_file_no_audio)
-            if details:
-                duration = details.get('duration', 'Unknown')
-                size = details.get('size', 'Unknown')
-                caption = f"Here's your cleaned video file. Duration: {round(float(duration))} seconds. Size: {round(int(size) / (1024 * 1024), 2)} MB"
+            duration = get_video_duration(output_file_no_audio)
+            size = os.path.getsize(output_file_no_audio)
+            caption = f"Here's your cleaned video file. Duration: {round(duration)} seconds. Size: {round(size / (1024 * 1024), 2)} MB"
                 
-                # Create thumbnail with duration, size, and play button
-                thumbnail_path = tempfile.mktemp(suffix=f"_{base_name}_thumb.png")
-                thumbnail = await loop.run_in_executor(executor, create_thumbnail, output_file_no_audio, thumbnail_path, duration, size)
+            # Create thumbnail with duration, size, and play button
+            thumbnail_path = tempfile.mktemp(suffix=f"_{base_name}_thumb.png")
+            thumbnail = await loop.run_in_executor(executor, create_thumbnail, output_file_no_audio, duration, size)
                 
-                if thumbnail:
-                    uploader = await ms.edit_text("Uploading media...")
-                    await client.send_video(
-                        chat_id=message.chat.id,
-                        caption=caption,
-                        video=output_file_no_audio,
-                        thumb=thumbnail,
-                        progress=progress_for_pyrogram,
-                        progress_args=("Uploading...", uploader, time.time())
-                    )
-                else:
-                    await message.reply_text("Failed to generate thumbnail. Please try again later.")
+            if thumbnail:
+                uploader = await ms.edit_text("Uploading media...")
+                await client.send_video(
+                    chat_id=message.chat.id,
+                    caption=caption,
+                    video=output_file_no_audio,
+                    thumb=thumbnail,
+                    progress=progress_for_pyrogram,
+                    progress_args=("Uploading...", uploader, time.time())
+                )
             else:
-                await message.reply_text("Failed to retrieve video details. Please try again later.")
+                await message.reply_text("Failed to generate thumbnail. Please try again later.")
+        else:
+            await message.reply_text("Failed to process the video. Please try again later.")
         
         await uploader.delete()
 
