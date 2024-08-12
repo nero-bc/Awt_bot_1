@@ -69,8 +69,13 @@ def create_thumbnail(input_file, output_thumbnail, duration, size):
     success, _ = run_command(command_thumbnail)
     
     if success:
-        # Add text overlays for duration and size
-        duration_text = f"{math.floor(float(duration) / 60):02}:{math.floor(float(duration) % 60):02}"
+        # Convert duration to MM:SS format
+        total_seconds = int(float(duration))
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+        duration_text = f"{minutes:02}:{seconds:02}"
+
+        # Calculate file size in MB
         size_mb = round(int(size) / (1024 * 1024), 2)
         size_text = f"{size_mb} MB"
         
