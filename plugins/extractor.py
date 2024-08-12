@@ -22,7 +22,8 @@ async def confirm_dwnld(client, message):
                 [InlineKeyboardButton(text="Trim Video ✂️", callback_data="handle_trim_video"),
                  InlineKeyboardButton(text="audio+audio 🎵", callback_data="set_merge_audio")],
                 [InlineKeyboardButton(text="Video+audio 📹", callback_data="set_merge_video"),
-                 InlineKeyboardButton(text="CANCEL", callback_data="close")]
+                 InlineKeyboardButton(text="Trim audio ✂️", callback_data="handle_trim_audio")],
+                [InlineKeyboardButton(text="Close ❌", callback_data="close")]
             ])
         )
     else:
