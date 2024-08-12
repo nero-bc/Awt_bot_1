@@ -136,7 +136,7 @@ async def handle_remove_audio(client, message):
                 
             # Create thumbnail with duration, size, and play button
             thumbnail_path = tempfile.mktemp(suffix=f"_{base_name}_thumb.png")
-            thumbnail = await loop.run_in_executor(executor, create_thumbnail, output_file_no_audio, duration, size)
+            thumbnail = await loop.run_in_executor(executor, create_thumbnail, output_file_no_audio, thumbnail_path, duration, size)
                 
             if thumbnail:
                 uploader = await ms.edit_text("Uploading media...")
