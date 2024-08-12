@@ -30,24 +30,24 @@ async def receive_audio(client, message: Message):
 
     media_file = message.audio
     start_time = time.time()
-    ms = await message.reply_text("Downloading audio...")
+    progress_message = await message.reply_text("Downloading audio...")
 
     try:
         media_path = await message.download(
             file_name=f"{DOWNLOAD_DIR}{media_file.file_name}",
             progress=progress,
-            progress_args=(ms, start_time, "Downloading audio")
+            progress_args=(progress_message, start_time, "Downloading audio")
         )
 
         user_media_files[user_id].append(media_path)
 
         if len(user_media_files[user_id]) == 1:
-            await ms.edit_text("First audio received. Now send the second audio.")
+            await progress_message.edit_text("First audio received. Now send the second audio.")
         elif len(user_media_files[user_id]) == 2:
-            await ms.edit_text("Both audios received. Merging them now...")
+            await progress_message.edit_text("Both audios received. Merging them now...")
             await merge_audios(client, message, user_id)
     except Exception as e:
-        await ms.edit_text(f"Error during download: {e}")
+        await progress_message.edit_text(f"Error during download: {e}")
 
 async def merge_audios(client, message, user_id):
     audio1, audio2 = user_media_files[user_id]
@@ -64,7 +64,7 @@ async def merge_audios(client, message, user_id):
     ]
 
     start_time = time.time()
-    msg = await ms.edit_text("Merging audio files...")
+    progress_message = await message.reply_text("Merging audio files...")
 
     process = await asyncio.create_subprocess_exec(
         *command,
@@ -76,22 +76,21 @@ async def merge_audios(client, message, user_id):
 
     if process.returncode == 0:
         if os.path.exists(output_path):
-            await msg.edit_text("Merging complete, uploading the merged audio...")
+            await progress_message.edit_text("Merging complete, uploading the merged audio...")
             try:
                 await message.reply_document(
                     document=output_path,
                     caption="Here is your merged audio file!",
                     progress=progress,
-                    progress_args=(msg, start_time, "Uploading merged audio")
+                    progress_args=(progress_message, start_time, "Uploading merged audio")
                 )
             except Exception as e:
-                await msg.edit_text(f"Failed to upload the merged audio: {e}")
+                await progress_message.edit_text(f"Failed to upload the merged audio: {e}")
         else:
-            await msg.edit_text("Merging completed, but the output file was not found.")
+            await progress_message.edit_text("Merging completed, but the output file was not found.")
     else:
-        await msg.edit_text(f"Failed to merge: {stderr.decode()}")
-        
-    await msg.delete()
+        await progress_message.edit_text(f"Failed to merge: {stderr.decode()}")
+
     # Clean up
     os.remove(audio1)
     os.remove(audio2)
