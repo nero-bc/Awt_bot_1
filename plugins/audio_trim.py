@@ -16,8 +16,8 @@ async def trim_audio(input_file, output_file, start_time, end_time):
         '-i', input_file,
         '-ss', start_time,
         '-to', end_time,
-        '-c:a', 'copy',  # Use audio-specific codec for faster processing
-        '-y',  # Overwrite output file without asking
+        '-c:a', 'copy',
+        '-y',
         output_file
     ]
     
@@ -42,27 +42,27 @@ async def trim_audio_handler(client, message):
         await message.reply("Please reply to an audio file with the command.")
         return
 
-        # Extracting command arguments
+    # Extracting command arguments
     args = message.text.split()
     if len(args) < 3:
-        await status_message.edit("Please provide the start and end times in the format: `/trim_audio start_time end_time`\nExample: `/trim_audio 00:00:10 00:00:30`")
+        await message.reply("Please provide the start and end times in the format: `/trim_audio start_time end_time`\nExample: `/trim_audio 00:00:10 00:00:30`")
         return
 
     start_time = args[1]
     end_time = args[2]
 
-        # Downloading the audio file
+    # Downloading the audio file
     audio = message.reply_to_message.audio
-    ms = await message.reply_text("Downloading audio file..")
+    ms = await message.reply_text("Downloading audio file...")
     try:
         input_file = await client.download_media(
             audio, 
             progress=progress_for_pyrogram, 
             progress_args=("Downloading your audio.", ms, time.time())
-        ) 
+        )
     except Exception as e:
         print(e)
-        return await ms.edit(f"An error occured while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
+        return await ms.edit(f"An error occurred while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False)
 
     try:
         await ms.edit("Trimming the audio file...")
@@ -74,27 +74,25 @@ async def trim_audio_handler(client, message):
         if trimmed_file:
             # Notify the user that the upload is in progress
             uploader = await ms.edit("Uploading the trimmed audio file...")
-        else:
-            caption = "Here's your trimmed audio file."
 
-        await client.send_video(
+            await client.send_audio(
                 chat_id=message.chat.id,
                 audio=trimmed_file,
                 progress=progress_for_pyrogram,
                 progress_args=("Uploading audio...", uploader, time.time())
             )
         else:
-            await message.reply_text("Failed to process the video. Please try again later.")
+            await message.reply_text("Failed to process the audio. Please try again later.")
         await uploader.delete()
         try:
             os.remove(trimmed_file)
         except Exception as e:
-            logging.error(f"Failed to remove file: {file_path}. Error: {e}")
+            print(f"Failed to remove file: {trimmed_file}. Error: {e}")
 
         try:
             os.remove(input_file)
         except Exception as e:
-            logging.error(f"Failed to remove file: {output_file_no_audio}. Error: {e}")
+            print(f"Failed to remove file: {input_file}. Error: {e}")
             
     except Exception as e:
         await message.reply_text(f"An error occurred: {e}")
