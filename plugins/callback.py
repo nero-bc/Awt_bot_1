@@ -4,6 +4,7 @@ from plugins.merge_audio import merge_audios  # Import the merge_audio function
 from plugins.merge_video import set_merge_video  # Import from merge.py
 from plugins import start, audio
 from helper.progress import PRGRS
+from plugins import audio_trim
 from helper.tools import clean_up
 from config import Config, Txt
 from plugins.audio import handle_remove_audio
@@ -95,7 +96,7 @@ async def cb_handler(client, query: CallbackQuery):
 
     elif data == "set_merge_audio":
         await query.answer()
-        await merge_audio(client, query.message)  # Call the merge_audio function
+        await query.message.reply_text("Now Click 👉 /merge_audio to start")
         await query.message.delete()
 
     elif data == "set_merge_video":
@@ -105,7 +106,7 @@ async def cb_handler(client, query: CallbackQuery):
 
     elif data == "handle_trim_audio":
         await query.answer()
-        await query.message.reply_text("please reply to a audio eg:/trim_audio 00:00:00 00:00:10")
+        await query.message.reply_text("please reply to a video or file in this Format eg: /trim_audio 00:00:00 00:00:20")
         await query.message.delete()
 
     elif data == "progress_msg":
