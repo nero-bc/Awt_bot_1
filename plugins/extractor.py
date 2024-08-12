@@ -28,12 +28,12 @@ async def confirm_dwnld(client, message):
 
     if filetype.mime_type.startswith("audio/"):
         await message.reply_text("what do you want me to do with this audio file 🤨")
-            quote=True,
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton(text="Audio+audio🎵", callback_data="set_merge_audio"),
-                 InlineKeyboardButton(text="Trim Audio ✂️", callback_data="handle_trim_audio")],
-                [InlineKeyboardButton(text="close❌", callback_data="close")]
-                )
+        quote=True,
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton(text="Audio+audio🎵", callback_data="set_merge_audio"),
+             InlineKeyboardButton(text="Trim Audio ✂️", callback_data="handle_trim_audio")],
+            [InlineKeyboardButton(text="close❌", callback_data="close")]
+            )
                
     else:
         await message.reply_text(
