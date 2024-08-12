@@ -156,6 +156,9 @@ async def handle_trim_video(client, message):
                 duration_sec = round(float(duration))
                 caption = f"Here's your trimmed video file. Duration: {duration_sec} seconds. Size: {size_mb} MB"
                 
+                # Get the current event loop
+                loop = asyncio.get_event_loop()
+                
                 # Create thumbnail with duration, size, and play button
                 thumbnail_path = tempfile.mktemp(suffix=f"_{base_name}_thumb.png")
                 thumbnail = await loop.run_in_executor(executor, create_thumbnail, output_file_trimmed, thumbnail_path, duration_sec, int(size))
