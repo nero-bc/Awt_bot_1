@@ -4,7 +4,6 @@ from plugins.merge_audio import merge_audios  # Import the merge_audio function
 from plugins.merge_video import set_merge_video  # Import from merge.py
 from plugins import start, audio
 from helper.progress import PRGRS
-from plugins.audio_trim import handle_trim_audio
 from helper.tools import clean_up
 from config import Config, Txt
 from plugins.audio import handle_remove_audio
