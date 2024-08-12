@@ -1,6 +1,6 @@
 from pyrogram import filters, Client
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from plugins.merge_audio import set_merge_audio
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from plugins.merge_audio import merge_audio  # Import the merge_audio function
 from plugins.merge_video import set_merge_video  # Import from merge.py
 from plugins import start, audio
 from helper.progress import PRGRS
@@ -14,7 +14,7 @@ import logging
 logging.basicConfig(filename='app.log', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 @Client.on_callback_query()
-async def cb_handler(client, query):
+async def cb_handler(client, query: CallbackQuery):
     data = query.data
 
     if data == "start_data":
@@ -43,11 +43,10 @@ async def cb_handler(client, query):
     elif data == "help":
         await query.answer()
         keyboard = InlineKeyboardMarkup([[
-                # Don't change the owner details if you change the bot not work  #
                 InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
                 ],[
-                InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data = "close"),
-                InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data = "start")
+                InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data="close"),
+                InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data="start")
             ]]) 
         await query.message.edit_text(
             text=Txt.HELP_TXT,
@@ -58,16 +57,15 @@ async def cb_handler(client, query):
     elif data == "about":
         await query.answer()
         keyboard = InlineKeyboardMarkup([[
-                #⚠️ Don't change the owner details if you change the bot not work ⚠️ #
                 InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
                 ],[
-                InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data = "close"),
-                InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data = "start")
+                InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data="close"),
+                InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data="start")
             ]])  
 
         await query.message.edit_text(
             text=Txt.ABOUT_TXT.format(client.mention),
-            disable_web_page_preview = True,
+            disable_web_page_preview=True,
         )
         return
 
@@ -97,7 +95,7 @@ async def cb_handler(client, query):
 
     elif data == "set_merge_audio":
         await query.answer()
-        await query.message.reply_text("Now Click 👉 /merge_audio to start")# Use the function from merge.py
+        await merge_audio(client, query.message)  # Call the merge_audio function
         await query.message.delete()
 
     elif data == "set_merge_video":
@@ -150,4 +148,4 @@ async def cb_handler(client, query):
             ) 
         except:
             await query.answer() 
-            await query.message.edit_text("**Details Not Found**")        
+            await query.message.edit_text("**Details Not Found**")
