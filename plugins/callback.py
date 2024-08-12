@@ -21,17 +21,11 @@ async def cb_handler(client, query: CallbackQuery):
     if data == "start_data":
         await query.answer()
         keyboard = InlineKeyboardMarkup([
-            [
-                InlineKeyboardButton("⚔️Update Channel", url="https://t.me/Anime_Warrior_Tamil"),
-                InlineKeyboardButton("🛡️Support Group", url="https://t.me/+NITVxLchQhYzNGZl")
-            ],
-            [
-                InlineKeyboardButton("📢Help", callback_data="help"),
-                InlineKeyboardButton("⚡About", callback_data="about")
-            ],
-            [
-                InlineKeyboardButton("❌Close", callback_data="close")
-            ]
+            [InlineKeyboardButton("⚔️Update Channel", url="https://t.me/Anime_Warrior_Tamil"),
+             InlineKeyboardButton("🛡️Support Group", url="https://t.me/+NITVxLchQhYzNGZl")],
+            [InlineKeyboardButton("📢Help", callback_data="help"),
+             InlineKeyboardButton("⚡About", callback_data="about")],
+             [InlineKeyboardButton("❌Close", callback_data="close")]
         ])
 
         await query.message.edit_text(
@@ -43,12 +37,12 @@ async def cb_handler(client, query: CallbackQuery):
 
     elif data == "help":
         await query.answer()
-        keyboard = InlineKeyboardMarkup([[
-                InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
-                ],[
-                InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data="close"),
-                InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data="start")
-            ]]) 
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")],
+            [InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data="close"),
+             InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data="start")]
+        ]) 
+        
         await query.message.edit_text(
             text=Txt.HELP_TXT,
             disable_web_page_preview=True,
@@ -58,11 +52,10 @@ async def cb_handler(client, query: CallbackQuery):
     elif data == "about":
         await query.answer()
         keyboard = InlineKeyboardMarkup([[
-                InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")
-                ],[
-                InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data="close"),
-                InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data="start")
-            ]])  
+            [InlineKeyboardButton("😈 ᴏᴡɴᴇʀ", url="https://t.me/Devilo7")],
+            [InlineKeyboardButton("❌ Cʟᴏꜱᴇ", callback_data="close"),
+             InlineKeyboardButton("⏪ Bᴀᴄᴋ", callback_data="start")]
+        ])  
 
         await query.message.edit_text(
             text=Txt.ABOUT_TXT.format(client.mention),
