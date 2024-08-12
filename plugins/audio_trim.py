@@ -42,25 +42,30 @@ async def trim_audio_handler(client, message):
         await message.reply("Please reply to an audio file with the command.")
         return
 
-    try:
-        # Notify the user that the download is starting
-        status_message = await message.reply("Downloading the audio file...")
-
         # Extracting command arguments
-        args = message.text.split()
-        if len(args) < 3:
-            await status_message.edit("Please provide the start and end times in the format: `/trim_audio start_time end_time`\nExample: `/trim_audio 00:00:10 00:00:30`")
-            return
+    args = message.text.split()
+    if len(args) < 3:
+        await status_message.edit("Please provide the start and end times in the format: `/trim_audio start_time end_time`\nExample: `/trim_audio 00:00:10 00:00:30`")
+        return
 
-        start_time = args[1]
-        end_time = args[2]
+    start_time = args[1]
+    end_time = args[2]
 
         # Downloading the audio file
-        audio = message.reply_to_message.audio
-        input_file = await client.download_media(audio)
+    audio = message.reply_to_message.audio
+    ms = await message.reply_text("Downloading audio file..")
+    try:
+        input_file = await client.download_media(
+            audio, 
+            progress=progress_for_pyrogram, 
+            progress_args=("Downloading your audio.", ms, time.time())
+        ) 
+    except Exception as e:
+        print(e)
+        return await ms.edit(f"An error occured while downloading.\n\nContact [SUPPORT]({SUPPORT_LINK})", link_preview=False) 
 
-        # Notify the user that the trimming is in progress
-        await status_message.edit("Trimming the audio file...")
+    try:
+        await ms.edit("Trimming the audio file...")
 
         output_file = f"trimmed_{audio.file_name}"
 
@@ -68,16 +73,28 @@ async def trim_audio_handler(client, message):
         trimmed_file = await trim_audio(input_file, output_file, start_time, end_time)
         if trimmed_file:
             # Notify the user that the upload is in progress
-            await status_message.edit("Uploading the trimmed audio file...")
-
-            await message.reply_document(trimmed_file)
-            os.remove(trimmed_file)
-            await status_message.delete()  # Delete the status message after completion
+            uploader = await ms.edit("Uploading the trimmed audio file...")
         else:
-            await status_message.edit("An error occurred while trimming the audio. Please ensure the start and end times are correct.")
-        
-        # Clean up the input file
-        os.remove(input_file)
+            caption = "Here's your trimmed audio file."
 
+        await client.send_video(
+                chat_id=message.chat.id,
+                audio=trimmed_file,
+                progress=progress_for_pyrogram,
+                progress_args=("Uploading audio...", uploader, time.time())
+            )
+        else:
+            await message.reply_text("Failed to process the video. Please try again later.")
+        await uploader.delete()
+        try:
+            os.remove(trimmed_file)
+        except Exception as e:
+            logging.error(f"Failed to remove file: {file_path}. Error: {e}")
+
+        try:
+            os.remove(input_file)
+        except Exception as e:
+            logging.error(f"Failed to remove file: {output_file_no_audio}. Error: {e}")
+            
     except Exception as e:
-        await status_message.edit(f"An unexpected error occurred: {e}")
+        await message.reply_text(f"An error occurred: {e}")
