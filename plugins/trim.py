@@ -2,18 +2,18 @@ import os
 import tempfile
 import subprocess
 import sys
-import math
 import time
 import asyncio
 import logging 
 from concurrent.futures import ThreadPoolExecutor
-from flask import Flask, request, jsonify
+from flask import Flask
 from pyrogram import Client, filters
 from plugins import start
 from helper.utils import progress_for_pyrogram
 from plugins import extractor 
 from pyrogram.errors import FloodWait
 from PIL import Image, ImageDraw  # Importing PIL for image processing
+from pyrogram.types import Message
 
 app = Flask(__name__)
 
@@ -112,18 +112,21 @@ def create_thumbnail(input_file, output_thumbnail, duration, size):
     return None
 
 @Client.on_message(filters.command("trim_video"))
-async def handle_trim_video(client, message):
-    args = message.command
-    if len(args) != 3:
-        await message.reply_text("Usage: /trim_video <start_time> <end_time>\nExample: /trim_video 00:00:10 00:00:20")
-        return
-
+async def handle_trim_video(client, message: Message):
     if not message.reply_to_message or not (message.reply_to_message.video or message.reply_to_message.document):
         await message.reply_text("Please reply to a video or document message with the /trim_video command.")
         return
 
-    start_time = args[1]
-    end_time = args[2]
+    # Ask for the start time
+    ask_start = await message.reply_text("Please enter the start time (format: HH:MM:SS):")
+    start_time = (await client.listen(message.chat.id)).text
+    await ask_start.delete()
+
+    # Ask for the end time
+    ask_end = await message.reply_text("Please enter the end time (format: HH:MM:SS):")
+    end_time = (await client.listen(message.chat.id)).text
+    await ask_end.delete()
+
     media = message.reply_to_message.video or message.reply_to_message.document
     ms = await message.reply_text("Downloading media...")
 
